@@ -19,7 +19,7 @@
 library(tidyverse)
 library(openxlsx)
 source("funcs.R")
-source("read_funcs.R")
+source("read_funcs.R") # not necessary here, initially sourced in main_dict.R
 source("ts_data.R")
 source("timeslices.R")
 source("main_dict.R")
@@ -34,7 +34,7 @@ subannual <- "output/Scen_SYS_SubAnnual_Data.xlsx"
 # User choices ----
 year <- 2011
 
-# Retrieve all the timeseries
+# Retrieve all the timeseries (ts_data.R)
 ts_data <- fetch_timeseries()
 
 # Select timeseries to base ts categorisation on
@@ -46,10 +46,10 @@ aggr_data$Wind <- (0.05 * ts_data[, "WindOnshore_DKE"]+
                      0.25 * ts_data[, "WindOffshore_DKE"]+
                      0.35 * ts_data[, "WindOffshore_DKW"])
 
-# Categorise all the hours in a year
+# Categorise all the hours in a year (timeslices.R)
 ts_cats <- categorise_ts(aggr_data, year)
 
-# Map hours to DayNite, Weekly, and Season time slices
+# Map hours to DayNite, Weekly, and Season time slices (transform.R)
 ts_map <- as.data.frame(map_ts(ts_cats))
 
 # Timeseries to be transformed to represent fraction of max production
@@ -63,7 +63,7 @@ ts_data[,re_series] <- sweep(ts_data[,re_series],
 # Add categories to the timeseries
 ts_data <- cbind(ts_cats,ts_data)
 
-### Main dictionary ----
+### Main dictionary ---- (main_dict.R)
 rules <- create_main_dict(mopath) %>%
   rename(PSet_PN=Process,CSet_CN=Commodity,"*Description"=Description)
 
@@ -72,7 +72,7 @@ rules <- create_main_dict(mopath) %>%
 # Create a workbook
 wb <- createWorkbook()
 
-# Add a sheet with timeslice duration
+# Add a sheet with timeslice duration (funcs.R and transform.R)
 write_TFM(ts_yrfr_data(ts_map[,"DayNite"],unique(rules$Region)), wb, sheet="TimeSlices",
           type="INS", fresh_sheet = TRUE)
 
